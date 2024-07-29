@@ -1,21 +1,57 @@
 import { OrbitControls, Stars, useGLTF } from '@react-three/drei';
 import { Canvas, useFrame } from '@react-three/fiber';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import Loader from './Loader';
+
+
 
 const Solarsystem = () => {
   const { scene: sun } = useGLTF('./Sun.glb');
   const sunScale = 0.03;
 
+  const [loading, setLoading] = useState(true);
+  const [opacity, setOpacity] = useState(0); 
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000); // 2000 milliseconds (2 seconds)
+
+    return () => clearTimeout(timer);
+  }, []);
+
+useEffect(() =>{
+  if (!loading){
+ // Animate fade-in effect
+ let opacityVal = 0;
+ const fadeDuration = 500; // 0.5 seconds
+ const fadeStart = performance.now();
+
+ const fadeIn = (time) => {
+   const elapsed = time - fadeStart;
+   opacityVal = Math.min(elapsed / fadeDuration, 1);
+   setOpacity(opacityVal);
+
+   if (opacityVal < 1) {
+     requestAnimationFrame(fadeIn);
+   }
+ };
+
+ requestAnimationFrame(fadeIn);
+  }
+},[loading])
+
   return (
     <div>
+      {loading ? (<Loader/>): (
       <div className=''>
         <Canvas style={{ height: "100vh" }} camera={{ position: [10, 0, -7.5], fov: 60 }}>
           <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-          <OrbitControls />
+          <OrbitControls minDistance={4}  maxDistance={150}/>
           <directionalLight />
-          <pointLight position={[-30, 0, -30]} power={10.0} />
+          <pointLight position={[0, 0, 0]} power={10.0} />
           <primitive scale={[sunScale, sunScale, sunScale]} object={sun} />
-          <pointLight intensity={5} distance={100} decay={2} color="orange" />
+          <pointLight intensity={10} distance={900} decay={2} color="orange" />
           <Mercury />
           <Venus />
           <Earth />
@@ -26,6 +62,7 @@ const Solarsystem = () => {
           <Neptune />
         </Canvas>
       </div>
+      )}
     </div>
   );
 }
