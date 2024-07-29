@@ -24,7 +24,7 @@ useEffect(() =>{
   if (!loading){
  // Animate fade-in effect
  let opacityVal = 0;
- const fadeDuration = 500; // 0.5 seconds
+ const fadeDuration = 1500; // 0.5 seconds
  const fadeStart = performance.now();
 
  const fadeIn = (time) => {
@@ -44,7 +44,7 @@ useEffect(() =>{
   return (
     <div>
       {loading ? (<Loader/>): (
-      <div className=''>
+      <div className='' style={{opacity}}>
         <Canvas style={{ height: "100vh" }} camera={{ position: [10, 0, -7.5], fov: 60 }}>
           <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
           <OrbitControls minDistance={4}  maxDistance={150}/>
