@@ -3,69 +3,99 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import React, { useEffect, useRef, useState } from 'react';
 import Loader from './Loader';
 
-
-
 const Solarsystem = () => {
   const { scene: sun } = useGLTF('./Sun.glb');
   const sunScale = 0.03;
-
   const [loading, setLoading] = useState(true);
-  const [opacity, setOpacity] = useState(0); 
+  const [opacity, setOpacity] = useState(0);
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 3000); // 2000 milliseconds (2 seconds)
+    }, 2000); // 2 seconds
 
     return () => clearTimeout(timer);
   }, []);
 
-useEffect(() =>{
-  if (!loading){
- // Animate fade-in effect
- let opacityVal = 0;
- const fadeDuration = 1500; // 0.5 seconds
- const fadeStart = performance.now();
+  useEffect(() => {
+    if (!loading) {
+      // Animate fade-in effect
+      let opacityVal = 0;
+      const fadeDuration = 1500; // 1.5 seconds
+      const fadeStart = performance.now();
 
- const fadeIn = (time) => {
-   const elapsed = time - fadeStart;
-   opacityVal = Math.min(elapsed / fadeDuration, 1);
-   setOpacity(opacityVal);
+      const fadeIn = (time) => {
+        const elapsed = time - fadeStart;
+        opacityVal = Math.min(elapsed / fadeDuration, 1);
+        setOpacity(opacityVal);
 
-   if (opacityVal < 1) {
-     requestAnimationFrame(fadeIn);
-   }
- };
+        if (opacityVal < 1) {
+          requestAnimationFrame(fadeIn);
+        }
+      };
 
- requestAnimationFrame(fadeIn);
-  }
-},[loading])
+      requestAnimationFrame(fadeIn);
+    }
+  }, [loading]);
 
   return (
     <div>
-      {loading ? (<Loader/>): (
-      <div className='' style={{opacity}}>
-        <Canvas style={{ height: "100vh" }} camera={{ position: [10, 0, -7.5], fov: 60 }}>
-          <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-          <OrbitControls minDistance={4}  maxDistance={150}/>
-          <directionalLight />
-          <pointLight position={[0, 0, 0]} power={10.0} />
-          <primitive scale={[sunScale, sunScale, sunScale]} object={sun} />
-          <pointLight intensity={10} distance={900} decay={2} color="orange" />
-          <Mercury />
-          <Venus />
-          <Earth />
-          <Mars />
-          <Jupiter />
-          <Saturn />
-          <Uranus />
-          <Neptune />
-        </Canvas>
-      </div>
+      {loading ? (
+        <Loader />
+      ) : (
+        <div className='' style={{ opacity }}>
+          <Canvas style={{ height: '100vh' }} camera={{ position: [500, 10, -7.5], fov: 60 }}>
+            <CameraControl />
+            <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+            <OrbitControls minDistance={4} maxDistance={550} />
+            <directionalLight />
+            <pointLight position={[0, 0, 0]} power={10.0} />
+            <primitive scale={[sunScale, sunScale, sunScale]} object={sun} />
+            <pointLight intensity={10} distance={900} decay={2} color="orange" />
+            <Mercury />
+            <Venus />
+            <Earth />
+            <Mars />
+            <Jupiter />
+            <Saturn />
+            <Uranus />
+            <Neptune />
+          </Canvas>
+        </div>
       )}
     </div>
   );
-}
+};
+
+const CameraControl = () => {
+  const ref = useRef();
+  const [animationComplete, setAnimationComplete] = useState(false);
+
+  useFrame(({ camera, clock }) => {
+    if (animationComplete) return; // Stop updating if the animation is complete
+console.log(camera)
+    const elapsedTime = clock.getElapsedTime(); // Get the elapsed time in seconds
+    const duration = 5; // 50 seconds
+    const startX = 500;
+    const endX = 10;
+    const progress = Math.min(elapsedTime / duration, 1); // Ensure progress doesn't exceed 1
+
+    // Linearly interpolate the camera's x position from startX to endX over the duration
+    camera.position.x = startX + (endX - startX) * progress;
+
+    // Optionally, adjust the camera's target (if needed)
+    if (ref.current) {
+      camera.lookAt(ref.current.position);
+    }
+
+    // Stop rendering after the animation is complete
+    if (progress >= 1) {
+      setAnimationComplete(true);
+    }
+  });
+
+  return <group ref={ref} />;
+};
 
 const Planet = ({ glbPath, scale, orbitRadius, orbitSpeed }) => {
   const { scene } = useGLTF(glbPath);
