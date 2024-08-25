@@ -73,7 +73,7 @@ const CameraControl = () => {
 
   useFrame(({ camera, clock }) => {
     if (animationComplete) return; // Stop updating if the animation is complete
-console.log(camera)
+
     const elapsedTime = clock.getElapsedTime(); // Get the elapsed time in seconds
     const duration = 5; // 50 seconds
     const startX = 500;
