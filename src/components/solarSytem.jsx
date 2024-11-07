@@ -1,6 +1,6 @@
 import { OrbitControls, Stars, useGLTF } from '@react-three/drei';
 import { Canvas, useFrame } from '@react-three/fiber';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import Loader from './Loader';
 
 const Solarsystem = () => {
@@ -17,34 +17,35 @@ const Solarsystem = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    if (!loading) {
-      // Animate fade-in effect
-      let opacityVal = 0;
-      const fadeDuration = 1500; // 1.5 seconds
-      const fadeStart = performance.now();
+  // useEffect(() => {
+  //   if (!loading) {
+  //     // Animate fade-in effect
+  //     let opacityVal = 0;
+  //     const fadeDuration = 1500; // 1.5 seconds
+  //     const fadeStart = performance.now();
 
-      const fadeIn = (time) => {
-        const elapsed = time - fadeStart;
-        opacityVal = Math.min(elapsed / fadeDuration, 1);
-        setOpacity(opacityVal);
+  //     const fadeIn = (time) => {
+  //       const elapsed = time - fadeStart;
+  //       opacityVal = Math.min(elapsed / fadeDuration, 1);
+  //       setOpacity(opacityVal);
 
-        if (opacityVal < 1) {
-          requestAnimationFrame(fadeIn);
-        }
-      };
+  //       if (opacityVal < 1) {
+  //         requestAnimationFrame(fadeIn);
+  //       }
+  //     };
 
-      requestAnimationFrame(fadeIn);
-    }
-  }, [loading]);
+  //     requestAnimationFrame(fadeIn);
+  //   }
+  // }, [loading]);
 
   return (
     <div>
       {loading ? (
         <Loader />
       ) : (
-        <div className='' style={{ opacity }}>
-          <Canvas style={{ height: '100vh' }} camera={{ position: [500, 10, -7.5], fov: 60 }}>
+<Suspense fallback={<Loader/>}>
+
+          <Canvas style={{ height: '100vh' }} camera={{ position: [500, 10, -7.5], fov: 60 }} >
             <CameraControl />
             <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
             <OrbitControls minDistance={4} maxDistance={550} />
@@ -61,7 +62,8 @@ const Solarsystem = () => {
             <Uranus />
             <Neptune />
           </Canvas>
-        </div>
+</Suspense>
+ 
       )}
     </div>
   );
@@ -75,7 +77,7 @@ const CameraControl = () => {
     if (animationComplete) return; // Stop updating if the animation is complete
 
     const elapsedTime = clock.getElapsedTime(); // Get the elapsed time in seconds
-    const duration = 5; // 50 seconds
+    const duration = 10; // 50 seconds
     const startX = 500;
     const endX = 10;
     const progress = Math.min(elapsedTime / duration, 1); // Ensure progress doesn't exceed 1
