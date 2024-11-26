@@ -1,7 +1,7 @@
-import { Environment, OrbitControls, Stars, useGLTF, useTexture } from '@react-three/drei'
+import { CameraControls, Stars, useGLTF,  } from '@react-three/drei'
 import { Canvas, useFrame, useLoader } from '@react-three/fiber'
 import React, { Suspense, useRef, useState } from 'react'
-import { DoubleSide, RepeatWrapping, TextureLoader } from 'three'
+import { TextureLoader } from 'three'
 import Loader from './Loader'
 
 const MeshSolarSystem = () => {
@@ -9,10 +9,9 @@ const MeshSolarSystem = () => {
    <Suspense fallback={<Loader/>}>
 <Canvas style={{ height: '100vh' }} camera={{ position: [500, 10, -7.5], fov: 60 }}>
 <CameraControl/>
-{/* <CameraControls/> */}
+<CameraControls minDistance={4} maxDistance={350}/>
 <Stars radius={50} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-<OrbitControls minDistance={4} maxDistance={350} />
-{/* <Environment preset='city'/> */}
+
 
 <ambientLight intensity={1} />
 
@@ -35,35 +34,46 @@ export default MeshSolarSystem
 
 
 const CameraControl = () => {
-    const ref = useRef();
-    const [animationComplete, setAnimationComplete] = useState(false);
-  
-    useFrame(({ camera, clock }) => {
-      if (animationComplete) return; // Stop updating if the animation is complete
-  
-      const elapsedTime = clock.getElapsedTime(); // Get the elapsed time in seconds
-      const duration = 10; // 50 seconds
-      const startX = 400;
-      const endX = 10;
-      const progress = Math.min(elapsedTime / duration, 1); // Ensure progress doesn't exceed 1
-  
-      // Linearly interpolate the camera's x position from startX to endX over the duration
-      camera.position.x = startX + (endX - startX) * progress;
-  
-      // Optionally, adjust the camera's target (if needed)
-      if (ref.current) {
-        camera.lookAt(ref.current.position);
-      }
-  
-      // Stop rendering after the animation is complete
-      if (progress >= 1) {
-        setAnimationComplete(true);
-      }
-    });
-  
-    return <group ref={ref} />;
-  };
+  const ref = useRef();
+  const [animationStartTime, setAnimationStartTime] = useState(null); // Track when to start animating
+  const delay = 3 ; // Delay in seconds
+  const duration = 10; // Duration of animation in seconds
+  const startX = 400;
+  const endX = 10;
 
+  useFrame(({ camera, clock }) => {
+    if (animationStartTime === null) {
+      // Initialize the animation start time after the delay
+      setAnimationStartTime(clock.getElapsedTime() + delay);
+      return;
+    }
+
+    const elapsedTime = clock.getElapsedTime();
+    const startAnimationTime = animationStartTime; 
+
+    if (elapsedTime < startAnimationTime) {
+      // Do nothing during the delay
+      return;
+    }
+
+    const progress = Math.min((elapsedTime - startAnimationTime) / duration, 1); // Ensure progress doesn't exceed 1
+
+    // Linearly interpolate the camera's x position from startX to endX over the duration
+    camera.position.x = startX + (endX - startX) * progress;
+
+    // Optionally, adjust the camera's target (if needed)
+    if (ref.current) {
+      camera.lookAt(ref.current.position);
+    }
+
+    // Stop updating if the animation is complete
+    if (progress >= 1) {
+      return;
+    }
+  });
+
+  return <group ref={ref} />;
+};
 
   const Sun = () =>{
     const suntexture = useLoader(TextureLoader,"/Texture/2k_sun.jpg")
@@ -199,7 +209,7 @@ const CameraControl = () => {
   const Jupiter = () =>{
     const ref = useRef()
     const jupitertexture = useLoader(TextureLoader,"/Texture/jupiter2_4k.jpg")
-    // const topo = useLoader(TextureLoader,"/Texture/topo.jpg")
+
     const orbitRadius= 16.4
     const  orbitSpeed= 0.6
     useFrame(({ clock }) => {
@@ -236,12 +246,8 @@ const CameraControl = () => {
   
     // Load textures
     const saturnTexture = useLoader(TextureLoader, "/Texture/2k_saturn.jpg");
-    const saturnRingTexture = useLoader(TextureLoader, "/Texture/2k_saturn_ring_alpha.jpg");
   
-    // Repeat and align the ring texture
-    saturnRingTexture.repeat.set(1, 1); // Use 1 repeat to align naturally with the ring
-    saturnRingTexture.wrapS = RepeatWrapping;
-    saturnRingTexture.wrapT = RepeatWrapping;
+ 
   
     return (
       <group ref={ref}>
