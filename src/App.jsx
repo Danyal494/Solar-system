@@ -1,6 +1,6 @@
-import { useState } from 'react'
+
 import './App.css'
-import Solarsytem from './components/solarSytem'
+
 import MeshSolarSystem from './components/MeshSolarSystem'
 
 

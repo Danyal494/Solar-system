@@ -1,37 +1,37 @@
-import { CameraControls, Stars, useGLTF,  } from '@react-three/drei'
-import { Canvas, useFrame, useLoader } from '@react-three/fiber'
-import React, { Suspense, useRef, useState } from 'react'
-import { TextureLoader } from 'three'
-import Loader from './Loader'
+import { CameraControls, Stars, useGLTF } from '@react-three/drei';
+import { Canvas, useFrame, useLoader } from '@react-three/fiber';
+import React, { Suspense, useRef, useState } from 'react';
+import { TextureLoader } from 'three';
+import Loader from './Loader';
 
 const MeshSolarSystem = () => {
+  const planets = [
+    { name: "Mercury", textures: ["/Texture/mercurymap.jpg", "/Texture/mercurybump.jpg"], orbitRadius: 3.4, orbitSpeed: 1.5 },
+    { name: "Venus", textures: ["/Texture/2k_venus_surface.jpg", "/Texture/2k_venus_atmosphere.jpg"], orbitRadius: 5.9, orbitSpeed: 1.2 },
+    { name: "Earth", textures: ["/Texture/earthmap1k.jpg", "/Texture/earthlights1k.jpg"], orbitRadius: 10.3, orbitSpeed: 0.5, hasMoon: true },
+    { name: "Mars", textures: ["/Texture/2k_mars.jpg", "/Texture/topo.jpg"], orbitRadius: 12.4, orbitSpeed: 0.8 },
+    { name: "Jupiter", textures: ["/Texture/jupiter2_4k.jpg"], orbitRadius: 16.4, orbitSpeed: 0.6 },
+    { name: "Saturn", textures: ["/Texture/2k_saturn.jpg"], orbitRadius: 18.9, orbitSpeed: 0.5, rings: "/Texture/SRing.glb" },
+    { name: "Uranus", textures: ["/Texture/2k_uranus.jpg"], orbitRadius: 21.6, orbitSpeed: 0.4, rings: "/Texture/URings.glb" },
+    { name: "Neptune", textures: ["/Texture/2k_neptune.jpg"], orbitRadius: 26.4, orbitSpeed: 0.3 },
+    { name: "Pluto", textures: ["/Texture/plutomap2k.jpg", "/Texture/plutobump2k.jpg"], orbitRadius: 29.4, orbitSpeed: 0.1 }
+  ];
+
   return (
-   <Suspense fallback={<Loader/>}>
-<Canvas style={{ height: '100vh' }} camera={{ position: [500, 10, -7.5], fov: 60 }}>
-<CameraControl/>
-<CameraControls minDistance={4} maxDistance={350}/>
-<Stars radius={50} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-
-
-<ambientLight intensity={1} />
-
-<Sun/>
-<Mercury/>
-<Venus/>
-<EarthMoon/>
-<Mars/>
-<Jupiter/>
-<Saturn/>
-<Uranus/>
-<Neptune/>
-<Pluto/>
-</Canvas>
-   </Suspense>
-  )
-}
-
-export default MeshSolarSystem
-
+    <Suspense fallback={<Loader />}>
+      <Canvas style={{ height: '100vh' }} camera={{ position: [500, 10, -7.5], fov: 60 }}>
+        <CameraControls minDistance={4} maxDistance={350} />
+        <CameraControl/>
+        <Stars radius={50} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+        <ambientLight intensity={1} />
+        <Sun />
+        {planets.map((planet) => (
+          <Planet key={planet.name} {...planet} />
+        ))}
+      </Canvas>
+    </Suspense>
+  );
+};
 
 const CameraControl = () => {
   const ref = useRef();
@@ -75,286 +75,69 @@ const CameraControl = () => {
   return <group ref={ref} />;
 };
 
-  const Sun = () =>{
-    const suntexture = useLoader(TextureLoader,"/Texture/2k_sun.jpg")
-    return(
-        <mesh position={[0,0,0]}>
-          <pointLight 
-        intensity={9} 
-        position={[0, 0, 0]} 
-        color="#FDB813" 
-        decay={2} 
-      />
-            <sphereGeometry args={[1,62,62]}/>
-
-            <meshStandardMaterial map={suntexture} emissive={"#FDB813"} emissiveIntensity={0.1}/>
-        </mesh>
-    )
-  }
 
 
+const Sun = () => {
+  const sunTexture = useLoader(TextureLoader, "/Texture/2k_sun.jpg");
+  return (
+    <mesh position={[0, 0, 0]}>
+      <pointLight intensity={9} position={[0, 0, 0]} color="#FDB813" decay={2} />
+      <sphereGeometry args={[1, 62, 62]} />
+      <meshStandardMaterial map={sunTexture} emissive="#FDB813" emissiveIntensity={0.1} />
+    </mesh>
+  );
+};
 
-  const Mercury = () =>{
-    const ref = useRef()
-    const mercurytexture = useLoader(TextureLoader,"/Texture/mercurymap.jpg")
-    const mercurybumptexture = useLoader(TextureLoader,"/Texture/mercurybump.jpg")
-    const orbitRadius= 3.4
-    const  orbitSpeed= 1.5
-    useFrame(({ clock }) => {
-      const elapsedTime = clock.getElapsedTime() * orbitSpeed;
-      ref.current.position.x = orbitRadius * Math.cos(elapsedTime);
-      ref.current.position.z = orbitRadius * Math.sin(elapsedTime);
-      ref.current.rotation.y = elapsedTime;
-    });
-    return(
-      <mesh ref={ref} >
-        <sphereGeometry args={[1,62,62]}/>
-        <meshStandardMaterial map={mercurytexture}  emissiveMap={mercurybumptexture}   emissiveIntensity={4.0}/>
-
-      </mesh>
-    )
-  }
-
-
-  const Venus = () =>{
-    const ref = useRef()
-    const venustexture = useLoader(TextureLoader,"/Texture/2k_venus_surface.jpg")
-    const venusatmospheretexture = useLoader(TextureLoader,"/Texture/2k_venus_atmosphere.jpg")
-    const orbitRadius= 5.9
-    const  orbitSpeed= 1.2
-    useFrame(({ clock }) => {
-      const elapsedTime = clock.getElapsedTime() * orbitSpeed;
-      ref.current.position.x = orbitRadius * Math.cos(elapsedTime);
-      ref.current.position.z = orbitRadius * Math.sin(elapsedTime);
-      ref.current.rotation.y = elapsedTime;
-    });
-    return(
-      <mesh ref={ref} >
-        <sphereGeometry args={[1,62,62]}/>
-        <meshStandardMaterial map={venustexture}  emissiveMap={venusatmospheretexture}   emissiveIntensity={0}/>
-
-      </mesh>
-   
-    )
-  }
-
-  const EarthMoon = () =>{
-    const earthRef = useRef();
-  const moonRef = useRef();
- 
+const Planet = ({ name, textures, orbitRadius, orbitSpeed, hasMoon, rings }) => {
+  const ref = useRef();
+  const texture = useLoader(TextureLoader, textures[0]);
+  const emissiveTexture = textures[1] && useLoader(TextureLoader, textures[1]);
+  const { scene: ringScene } = rings ? useGLTF(rings) : {};
 
   useFrame(({ clock }) => {
-    const elapsedTime = clock.getElapsedTime();
-    const earthOrbitRadius = 10.3;
-    const earthOrbitSpeed = 0.5;
-    const moonOrbitRadius = 0.23;
-    const moonOrbitSpeed = 2;
-
-    earthRef.current.position.x = earthOrbitRadius * Math.cos(elapsedTime * earthOrbitSpeed);
-    earthRef.current.position.z = earthOrbitRadius * Math.sin(elapsedTime * earthOrbitSpeed);
-    earthRef.current.rotation.y = elapsedTime * earthOrbitSpeed;
-
-    moonRef.current.position.x = moonOrbitRadius * Math.cos(elapsedTime * moonOrbitSpeed);
-    moonRef.current.position.z = moonOrbitRadius * Math.sin(elapsedTime * moonOrbitSpeed);
+    const elapsedTime = clock.getElapsedTime() * orbitSpeed;
+    ref.current.position.x = orbitRadius * Math.cos(elapsedTime);
+    ref.current.position.z = orbitRadius * Math.sin(elapsedTime);
+    ref.current.rotation.y = elapsedTime;
   });
-  const earthtexture = useLoader(TextureLoader, '/Texture/earthmap1k.jpg');
-  const eathlightmap = useLoader(TextureLoader, "/Texture/earthlights1k.jpg")
-  const moontexture = useLoader(TextureLoader,"/Texture/moonmap2k.jpg")
-  const moonbumptexture = useLoader(TextureLoader,"/Texture/moonbump2k.jpg")
-    return(
-        <group ref={earthRef}>
-            <mesh>
-                <sphereGeometry args={[1,62,62]} />
-                <meshStandardMaterial map={earthtexture} 
-  emissiveMap={eathlightmap} 
-  emissive={'white'} 
-  emissiveIntensity={1.0}  />
-            </mesh>
-<group ref={moonRef}>
-    <mesh  position={[4,0,0]} scale={0.3}>
-        <sphereGeometry  args={[1,62,62]} />
-        <meshStandardMaterial map={moontexture} 
-  emissiveMap={moonbumptexture} 
-//   emissive={'white'} 
-  emissiveIntensity={4.0}/>
-    </mesh>
-</group>
 
-        </group>
-    )
-  }
-
-  const Mars = () =>{
-    const ref = useRef()
-    const Marstexture = useLoader(TextureLoader,"/Texture/2k_mars.jpg")
-    const topo = useLoader(TextureLoader,"/Texture/topo.jpg")
-    const orbitRadius= 12.4
-    const  orbitSpeed= 0.8
-    useFrame(({ clock }) => {
-      const elapsedTime = clock.getElapsedTime() * orbitSpeed;
-      ref.current.position.x = orbitRadius * Math.cos(elapsedTime);
-      ref.current.position.z = orbitRadius * Math.sin(elapsedTime);
-      ref.current.rotation.y = elapsedTime;
-    });
-    return(
-      <mesh ref={ref} >
-        <sphereGeometry args={[1,62,62]}/>
-        <meshStandardMaterial map={Marstexture} emissiveMap={topo}  />
-
+  return (
+    <group ref={ref}>
+      <mesh>
+        <sphereGeometry args={[1, 62, 62]} />
+        <meshStandardMaterial
+          map={texture}
+          emissiveMap={emissiveTexture}
+          // emissive="white"
+          emissiveIntensity={0.5}
+        />
       </mesh>
-   
-    )
-  }
+      {rings && <primitive object={ringScene} scale={0.03} />}
+      {hasMoon && <Moon />}
+    </group>
+  );
+};
 
-  const Jupiter = () =>{
-    const ref = useRef()
-    const jupitertexture = useLoader(TextureLoader,"/Texture/jupiter2_4k.jpg")
+const Moon = () => {
+  const ref = useRef();
 
-    const orbitRadius= 16.4
-    const  orbitSpeed= 0.6
-    useFrame(({ clock }) => {
-      const elapsedTime = clock.getElapsedTime() * orbitSpeed;
-      ref.current.position.x = orbitRadius * Math.cos(elapsedTime);
-      ref.current.position.z = orbitRadius * Math.sin(elapsedTime);
-      ref.current.rotation.y = elapsedTime;
-    });
-    return(
-      <mesh ref={ref} >
-        <sphereGeometry args={[1,62,62]}/>
-        <meshStandardMaterial map={jupitertexture}  />
+  const moonTexture = useLoader(TextureLoader, "/Texture/moonmap2k.jpg");
+  const moonBump = useLoader(TextureLoader, "/Texture/moonbump2k.jpg");
 
+  useFrame(({ clock }) => {
+    const elapsedTime = clock.getElapsedTime() * 2; // Moon's faster orbit
+    ref.current.position.x = 2 * Math.cos(elapsedTime); // Radius of Moon's orbit
+    ref.current.position.z = 2 * Math.sin(elapsedTime);
+  });
+
+  return (
+    <group ref={ref}>
+      <mesh>
+        <sphereGeometry args={[0.3, 62, 62]} />
+        <meshStandardMaterial map={moonTexture} bumpMap={moonBump} />
       </mesh>
-   
-    )
-  }
-  const Saturn = () => {
-    const ref = useRef();
-  
-    // Orbit parameters
-    const orbitRadius = 18.9;
-    const orbitSpeed = 0.5;
-  
-    const {scene} = useGLTF("/Texture/SRing.glb")
+    </group>
+  );
+};
 
-    // Animate Saturn's orbit
-    useFrame(({ clock }) => {
-      const elapsedTime = clock.getElapsedTime() * orbitSpeed;
-      ref.current.position.x = orbitRadius * Math.cos(elapsedTime);
-      ref.current.position.z = orbitRadius * Math.sin(elapsedTime);
-      ref.current.rotation.y = elapsedTime;
-    });
-  
-    // Load textures
-    const saturnTexture = useLoader(TextureLoader, "/Texture/2k_saturn.jpg");
-  
- 
-  
-    return (
-      <group ref={ref}>
-  
-        <group>
-          <mesh>
-            <sphereGeometry args={[1, 62, 62]} />
-            <meshStandardMaterial map={saturnTexture} />
-          </mesh>
-        </group>
-  
-
-        <group scale={0.03}>
-          <primitive object={scene}/>
-          {/* <mesh rotation={[Math.PI / 2, 0, 0]} scale={1.7}>
-            <ringGeometry args={[1.1, 1.5, 128]} /> 
-            <meshStandardMaterial
-              map={saturnRingTexture}
-              side={DoubleSide}
-              transparent={true} 
-            />
-          </mesh> */}
-        </group>
-      </group>
-    );
-  };
-  const Uranus = () =>{
-    const ref = useRef()
-    const orbitRadius= 21.6
-    const  orbitSpeed= 0.4
-    useFrame(({ clock }) => {
-      const elapsedTime = clock.getElapsedTime() * orbitSpeed;
-      ref.current.position.x = orbitRadius * Math.cos(elapsedTime);
-      ref.current.position.z = orbitRadius * Math.sin(elapsedTime);
-      ref.current.rotation.y = elapsedTime;
-    });
-    const uranustexture = useLoader(TextureLoader,"/Texture/2k_uranus.jpg")
-    // const uranusRtexture = useLoader(TextureLoader,"/Texture/uranusringtrans.gif")
-    const uranusringtexture = useLoader(TextureLoader,"/Texture/uranusringcolour.jpg")
-    const uranusRtranstexture = useLoader(TextureLoader,"/Texture/uranusringtrans.gif")
-    const {scene} = useGLTF('/Texture/URings.glb')
-    return(
-      <group ref={ref}>
-<group>
-<mesh>
-
-  <sphereGeometry args={[1,62,62]}/>
-  <meshStandardMaterial  emissiveIntensity={0.1} map={uranustexture}/>
-
-</mesh>
-</group>
-<group scale={0.03}>
-  <primitive object={scene}/>
-{/* 
-      <mesh rotation={[40, 0, 0]} scale={1}>
-        <ringGeometry args={[1.2,1.9,62]} />
-        <meshStandardMaterial map={uranusringtexture} emissiveMap={uranusRtranstexture}  side={DoubleSide} />
-      </mesh> */}
-</group>
-      </group>
-    )
-  }
-
-
-
-  const Neptune = () =>{
-    const ref = useRef()
-    const Neptunetexture = useLoader(TextureLoader,"/Texture/2k_neptune.jpg")
-    // const topo = useLoader(TextureLoader,"/Texture/topo.jpg")
-    const orbitRadius= 26.4
-    const  orbitSpeed= 0.3
-    useFrame(({ clock }) => {
-      const elapsedTime = clock.getElapsedTime() * orbitSpeed;
-      ref.current.position.x = orbitRadius * Math.cos(elapsedTime);
-      ref.current.position.z = orbitRadius * Math.sin(elapsedTime);
-      ref.current.rotation.y = elapsedTime;
-    });
-    return(
-      <mesh ref={ref} >
-        <sphereGeometry args={[1,62,62]}/>
-        <meshStandardMaterial map={Neptunetexture}  />
-
-      </mesh>
-   
-    )
-  }
-  const Pluto = () =>{
-    const ref = useRef()
-    const Plutotexture = useLoader(TextureLoader,"/Texture/plutomap2k.jpg")
-    const plutobump = useLoader(TextureLoader,"/Texture/plutobump2k.jpg")
-    const orbitRadius= 29.4
-    const  orbitSpeed= 0.1
-    useFrame(({ clock }) => {
-      const elapsedTime = clock.getElapsedTime() * orbitSpeed;
-      ref.current.position.x = orbitRadius * Math.cos(elapsedTime);
-      ref.current.position.z = orbitRadius * Math.sin(elapsedTime);
-      ref.current.rotation.y = elapsedTime;
-    });
-    return(
-      <mesh ref={ref} >
-        <sphereGeometry args={[1,62,62]}/>
-        <meshStandardMaterial map={Plutotexture} roughnessMap={plutobump} metalness={0}  roughness={1} />
-
-      </mesh>
-   
-    )
-  }
-
-
-  
+export default MeshSolarSystem;
